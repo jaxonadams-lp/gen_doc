@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from directory import Directory
+from fparser import PyParser, RubyParser
 
 
 def get_path():
@@ -62,6 +63,11 @@ def main():
 
     directory = Directory(os.getcwd())
     directory.pprint()
+
+    print("\n")
+
+    pyparser = PyParser(directory.files_by_ext(".py"))
+    rbparser = RubyParser(directory.files_by_ext(".rb"))
 
 
 # !---------------------------------------------------------------------------

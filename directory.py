@@ -50,6 +50,24 @@ class Directory:
                 return True
             
         return False
+    
+    def files_by_ext(self, extension):
+        """Return a list of all files, including those in
+        subdirectories. Files are filtered by the provided
+        extension.
+        """
+
+        file_group = []
+
+        for f in self.files:
+            if f.endswith(extension):
+                file_group.append(f)
+
+        for subdir in self.subdirectories:
+            nested_files = subdir.files_by_ext(extension)
+            file_group += nested_files
+
+        return file_group
 
     def pprint(self, indent=""):
         """Print all files and subdirectories stored."""
