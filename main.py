@@ -61,7 +61,7 @@ def main():
     print(f"\nCurrent directory: {os.getcwd()}\n")
 
     directory = Directory(os.getcwd())
-    directory.locate_files()
+    directory.pprint()
 
 
 # !---------------------------------------------------------------------------
