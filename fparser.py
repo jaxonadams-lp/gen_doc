@@ -4,9 +4,7 @@ of a parser include a PyParser and a RubyParser.
 """
 
 
-import re
-
-from icecream import ic # TODO: REMOVE ME
+import ast
 
 
 class Parser:
@@ -48,10 +46,38 @@ class PyParser(Parser):
     def add_docstrings(self, fname, f_content):
         """Read the given file for all docstrings, adding them to self.data"""
 
-        # TODO: FIX ME -- exclude triple-quoted fstrings (f"""somestr""")
-        ds_pattern = r'(\'\'\'(.*?)\'\'\'|\"\"\"(.*?)\"\"\")'
-        ds_matches = re.finditer(ds_pattern, f_content, re.DOTALL)
-        docstrings = [match[1] or match[2] for match in ds_matches]
+        docstrings = {
+            "module_doc": None,
+            "class_docs": [],
+            "function_docs": [],
+        }
+
+        tree = ast.parse(f_content, filename=fname)
+
+        # check module-level docstring
+        if tree and isinstance(tree, ast.Module): # if tree is a module
+            if tree.body and isinstance(tree.body[0], ast.Expr): # if first element is an expression
+                module_docstring = tree.body[0].value.s # get the expression val as a string
+                docstrings["module_doc"] = module_docstring
+
+        # walk through syntax tree looking for docstrings
+        fn_docs = []
+        cl_docs = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.body:
+                # function docstring
+                first_statement = node.body[0]
+                if isinstance(first_statement, ast.Expr):
+                    if isinstance(first_statement.value, ast.Constant):
+                        fn_docs.append({node.name: first_statement.value.s})
+            elif isinstance(node, ast.ClassDef) and node.body:
+                # class docstring
+                if isinstance(node.body[0], ast.Expr):
+                    if isinstance(node.body[0].value, ast.Constant):
+                        cl_docs.append({node.name: node.body[0].value.s})
+
+        docstrings["class_docs"] = cl_docs
+        docstrings["function_docs"] = fn_docs
 
         self.data[fname]["docstrings"] = docstrings
 
