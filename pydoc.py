@@ -22,7 +22,7 @@ class PyDoc:
 
     ImportInfo = namedtuple("ImportInfo", "module name alias")
     ClassInfo = namedtuple("ClassInfo", "name docstring")
-    FunctionInfo = namedtuple("FunctionInfo", "name docstring")
+    FunctionInfo = namedtuple("FunctionInfo", "name docstring args")
 
     def __init__(self, filename):
         self.filename = filename
@@ -40,10 +40,10 @@ class PyDoc:
         new_import = self.ImportInfo(module, name, alias)
         self.imported_libraries.append(new_import)
 
-    def add_function_info(self, func_name, doc):
+    def add_function_info(self, func_name, doc, args):
         """Add a new FunctionInfo namedtuple to self.functions."""
 
-        new_func = self.FunctionInfo(func_name, doc)
+        new_func = self.FunctionInfo(func_name, doc, args)
         self.functions.append(new_func)
 
     def add_class_info(self, cl_name, doc):
@@ -63,7 +63,9 @@ class PyDoc:
         print("\n")
 
         print("Imported libraries:")
-        # print("    " + ", ".join(lib for lib in self.imported_libraries))
+        if not len(self.imported_libraries):
+            print("    None")
+            print("\n")
         for im in self.imported_libraries:
             print(f"    Module: {'.'.join(im.module)}")
             print(f"      Name: {'.'.join(im.name)}")
@@ -71,6 +73,9 @@ class PyDoc:
             print("\n")
 
         print("Classes:")
+        if not len(self.classes):
+            print("    None")
+            print("\n")
         for cl in self.classes:
             print("    CLASS " + cl.name)
             print("    " + "Docstring:")
@@ -78,10 +83,15 @@ class PyDoc:
             print("\n")
 
         print("Functions:")
+        if not len(self.functions):
+            print("    None")
+            print("\n")
         for fn in self.functions:
             print("    FUNCTION " + fn.name)
             print("    " + "Docstring:")
             print("    " * 2 + fn.docstring.replace("    ", "    " * 2))
+            print("    " + "Arguments:")
+            print("    " * 2 + ", ".join(fn.args) if len(fn.args) else "    " * 2 + "None")
             print("\n")
 
         print("\n")

@@ -74,10 +74,11 @@ class PyParser(Parser):
             # function definition
             elif isinstance(node, ast.FunctionDef) and node.body:
                 # function docstring
+                args = [a.arg for a in node.args.args]
                 first_statement = node.body[0]
                 if isinstance(first_statement, ast.Expr):
                     if isinstance(first_statement.value, ast.Constant):
-                        pydoc.add_function_info(node.name, first_statement.value.s)
+                        pydoc.add_function_info(node.name, first_statement.value.s, args)
             # class definition
             elif isinstance(node, ast.ClassDef) and node.body:
                 # class docstring
