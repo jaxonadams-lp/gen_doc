@@ -8,7 +8,6 @@ documented. The following information is stored:
  - Function names
  - Function docstrings
  - Function parameters
- - Function return values
  - Class names
  - Class docstrings
 """
