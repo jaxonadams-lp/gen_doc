@@ -6,6 +6,8 @@ of a parser include a PyParser and a RubyParser.
 
 import ast
 
+from pydoc import PyDoc
+
 
 class Parser:
     """A base class representing a code parser object."""
@@ -29,10 +31,11 @@ class PyParser(Parser):
     def __init__(self, files):
         super().__init__(files)
 
-        self.data = { fname: {} for fname in self.files }
+        self.pydocs = []
         self.load_data()
 
-        print(self.data)
+        for doc in self.pydocs:
+            doc.pprint()
 
     def load_data(self):
         """Call member functions to populate the data attribute
@@ -40,17 +43,14 @@ class PyParser(Parser):
         """
 
         for fname, f_content in self.load_files():
-            # TODO: call functions to populate self.data
-            self.add_docstrings(fname, f_content)
+            self.pydocs.append(PyDoc(fname))
 
-    def add_docstrings(self, fname, f_content):
+            self.parse_file(fname, f_content)
+
+    def parse_file(self, fname, f_content):
         """Read the given file for all docstrings, adding them to self.data"""
 
-        docstrings = {
-            "module_doc": None,
-            "class_docs": [],
-            "function_docs": [],
-        }
+        pydoc = [doc for doc in self.pydocs if doc.filename == fname][0]
 
         tree = ast.parse(f_content, filename=fname)
 
@@ -58,28 +58,29 @@ class PyParser(Parser):
         if tree and isinstance(tree, ast.Module): # if tree is a module
             if tree.body and isinstance(tree.body[0], ast.Expr): # if first element is an expression
                 module_docstring = tree.body[0].value.s # get the expression val as a string
-                docstrings["module_doc"] = module_docstring
+                # docstrings["module_doc"] = module_docstring
+                pydoc.module_docstring = module_docstring
 
         # walk through syntax tree looking for docstrings
-        fn_docs = []
-        cl_docs = []
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef) and node.body:
                 # function docstring
                 first_statement = node.body[0]
                 if isinstance(first_statement, ast.Expr):
                     if isinstance(first_statement.value, ast.Constant):
-                        fn_docs.append({node.name: first_statement.value.s})
+                        # fn_docs.append({node.name: first_statement.value.s})
+                        pydoc.add_function_info(node.name, first_statement.value.s)
             elif isinstance(node, ast.ClassDef) and node.body:
                 # class docstring
                 if isinstance(node.body[0], ast.Expr):
                     if isinstance(node.body[0].value, ast.Constant):
-                        cl_docs.append({node.name: node.body[0].value.s})
+                        # cl_docs.append({node.name: node.body[0].value.s})
+                        pydoc.add_class_info(node.name, node.body[0].value.s)
 
-        docstrings["class_docs"] = cl_docs
-        docstrings["function_docs"] = fn_docs
+        # docstrings["class_docs"] = cl_docs
+        # docstrings["function_docs"] = fn_docs
 
-        self.data[fname]["docstrings"] = docstrings
+        # self.data[fname]["docstrings"] = docstrings
 
 
 class RubyParser(Parser):
