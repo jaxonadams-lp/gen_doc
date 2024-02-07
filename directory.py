@@ -26,7 +26,9 @@ class Directory:
         for entry in os.listdir(self.directory):
             if os.path.isfile(f"{self.directory}\\{entry}"):
                 if entry.endswith(".py") or entry.endswith(".rb"):
-                    files.append(entry)
+                    files.append(
+                        os.path.normpath(os.path.join(self.directory, entry))
+                    )
             elif os.path.isdir(f"{self.directory}\\{entry}"):
                 subdirs.append(entry)
 
@@ -76,7 +78,7 @@ class Directory:
             print(f"PRINTING TREE FOR {self.name}")
 
         for filename in self.files:
-            print(f"{indent} |-- {filename}")
+            print(f"{indent} |-- " + filename.split("\\")[-1])
         for dirname in self.subdirectories:
             if dirname.files_present():
                 print(f"{indent} +-- {dirname.name}")

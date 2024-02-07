@@ -20,6 +20,7 @@ from collections import namedtuple
 class PyDoc:
     """A collection of documentation on a python file."""
 
+    ImportInfo = namedtuple("ImportInfo", "module name alias")
     ClassInfo = namedtuple("ClassInfo", "name docstring")
     FunctionInfo = namedtuple("FunctionInfo", "name docstring")
 
@@ -32,6 +33,12 @@ class PyDoc:
         # lists of ClassInfo and FunctionInfo named tuples
         self.classes = []
         self.functions = []
+
+    def add_import(self, module, name, alias):
+        """Add a new ImportInfo namedtuple to self.imported_libraries."""
+
+        new_import = self.ImportInfo(module, name, alias)
+        self.imported_libraries.append(new_import)
 
     def add_function_info(self, func_name, doc):
         """Add a new FunctionInfo namedtuple to self.functions."""
@@ -48,16 +55,20 @@ class PyDoc:
     def pprint(self):
         """Pretty-print class data to the console."""
 
-        print(f"COLLECTED INFO FOR FILE {self.filename}")
-        print("------------------------" + "-" * len(self.filename))
+        print(f"COLLECTED INFO FOR FILE " + self.filename.split("\\")[-1])
+        print("------------------------" + "-" * len(self.filename.split("\\")[-1]))
 
         print("Module docstring:")
         print(self.module_docstring)
         print("\n")
 
         print("Imported libraries:")
-        print("    " + ", ".join(lib for lib in self.imported_libraries))
-        print("\n")
+        # print("    " + ", ".join(lib for lib in self.imported_libraries))
+        for im in self.imported_libraries:
+            print(f"    Module: {'.'.join(im.module)}")
+            print(f"      Name: {'.'.join(im.name)}")
+            print(f"     Alias: {im.alias}")
+            print("\n")
 
         print("Classes:")
         for cl in self.classes:
