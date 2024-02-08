@@ -5,8 +5,9 @@ of a parser include a PyParser and a RubyParser.
 
 
 import ast
+import re
 
-from pydoc import PyDoc
+from pythondoc import PyDoc
 
 
 class Parser:
@@ -33,9 +34,6 @@ class PyParser(Parser):
 
         self.pydocs = []
         self.load_data()
-
-        for doc in self.pydocs:
-            doc.pprint()
 
     def load_data(self):
         """Call member functions to populate the data attribute
@@ -94,5 +92,32 @@ class PyParser(Parser):
 class RubyParser(Parser):
     """A ruby code parser object."""
 
+    # regex matches the following pattern:
+    # {
+    #     title: "<some string>",
+    #     connection: {<some_object_def>},
+    #     actions: {<some_object_def},
+    #     triggers: {<some_object_def},
+    #     methods: {<some_object_def},
+    #     object_definitions: {<some_object_def},
+    #     pick_lists: {<some_object_def>}
+    # }
+    # the following fields are captured:
+    # title, actions, triggers, methods
+    connector_pattern = r'\{[\s\n]*(title:\s*"[^"]*"),[\s\n]*' \
+                        r'connection:\s*\{[\w\W]*\},[\w\W]*' \
+                        r'(actions:\s*\{[\w\W]*\}),[\w\W]*' \
+                        r'(triggers:\s*\{[\w\W}]*\}),[\n\s]*' \
+                        r'(methods:\s*\{[\w\W]*\}),[\n\s]*' \
+                        r'object_definitions:\s*\{[\w\W]*\},[\n\s]*' \
+                        r'pick_lists:\s*\{[\w\W]*\}[\n\s]*\}'
+
     def __init__(self, files):
         super().__init__(files)
+
+        for fname, f_content in self.load_files():
+            print(fname)
+
+            match = re.search(self.connector_pattern, f_content)
+            if match is not None:
+                print([g for g in match.groups()])
