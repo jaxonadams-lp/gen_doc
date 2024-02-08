@@ -36,14 +36,50 @@ class PyParser(Parser):
         self.load_data()
 
     def load_data(self):
-        """Call member functions to populate the data attribute
-        with code that should be documented.
+        """Call member functions to populate pydocs with PyDoc instances
+        containing documentable file content.
         """
 
         for fname, f_content in self.load_files():
             self.pydocs.append(PyDoc(fname))
 
             self.parse_file(fname, f_content)
+
+    def parse_imports(self, node, pydoc):
+        """Parse a given AST node for import data and add it to the PyDoc."""
+
+        if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
+            if isinstance(node, ast.Import):
+                module = []
+            else:
+                module = node.module.split(".")
+            for n in node.names:
+                pydoc.add_import(module, n.name.split("."), n.asname)
+
+    def parse_functions(self, node, pydoc):
+        """Parse a given AST node for function data and add it to the PyDoc."""
+
+        if isinstance(node, ast.FunctionDef) and node.body:
+            # arguments
+            args = [a.arg for a in node.args.args]
+            docstr = "Docstring not defined."
+            # docstring
+            first_statement = node.body[0]
+            if isinstance(first_statement, ast.Expr):
+                if isinstance(first_statement.value, ast.Constant):
+                    docstr = first_statement.value.s
+            pydoc.add_function_info(node.name, docstr, args)
+
+    def parse_classes(self, node, pydoc):
+        """Parse a given AST node for class data and add it to the PyDoc."""
+
+        if isinstance(node, ast.ClassDef) and node.body:
+            # class docstring
+            docstr = "Docstring not defined."
+            if isinstance(node.body[0], ast.Expr):
+                if isinstance(node.body[0].value, ast.Constant):
+                    docstr =  node.body[0].value.s
+            pydoc.add_class_info(node.name, docstr)
 
     def parse_file(self, fname, f_content):
         """Read the given file for all docstrings, adding them to self.data"""
@@ -61,32 +97,13 @@ class PyParser(Parser):
         # walk through syntax tree looking for data
         for node in ast.walk(tree):
             # import
-            if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
-                if isinstance(node, ast.Import):
-                    module = []
-                else:
-                    module = node.module.split(".")
-                for n in node.names:
-                    pydoc.add_import(module, n.name.split("."), n.asname)
+            self.parse_imports(node, pydoc)
             
-            # function definition
-            elif isinstance(node, ast.FunctionDef) and node.body:
-                args = [a.arg for a in node.args.args]
-                docstr = "Docstring not defined."
-                # docstring
-                first_statement = node.body[0]
-                if isinstance(first_statement, ast.Expr):
-                    if isinstance(first_statement.value, ast.Constant):
-                        docstr = first_statement.value.s
-                pydoc.add_function_info(node.name, docstr, args)
-            # class definition
-            elif isinstance(node, ast.ClassDef) and node.body:
-                # class docstring
-                docstr = "Docstring not defined."
-                if isinstance(node.body[0], ast.Expr):
-                    if isinstance(node.body[0].value, ast.Constant):
-                        docstr =  node.body[0].value.s
-                pydoc.add_class_info(node.name, docstr)
+            # function data
+            self.parse_functions(node, pydoc)
+
+            # class data
+            self.parse_classes(node, pydoc)
 
 
 class RubyParser(Parser):
@@ -115,9 +132,20 @@ class RubyParser(Parser):
     def __init__(self, files):
         super().__init__(files)
 
+        self.load_data()
+
+    def load_data(self):
+        """Call member functions to populate rubydocs with RubyDoc instances
+        containing documentable file content.
+        """
+
         for fname, f_content in self.load_files():
             print(fname)
 
             match = re.search(self.connector_pattern, f_content)
             if match is not None:
-                print([g for g in match.groups()])
+                title_str, actions_str, triggers_str, methods_str = match.groups()
+                print(f"Title: {title_str}")
+                print(f"Actions: {actions_str}")
+                print(f"Triggers: {triggers_str}")
+                print(f"Methods: {methods_str}")

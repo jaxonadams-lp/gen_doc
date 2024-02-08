@@ -69,8 +69,8 @@ def main():
     pyparser = PyParser(directory.files_by_ext(".py"))
     rbparser = RubyParser(directory.files_by_ext(".rb"))
 
-    # for docdata in pyparser.pydocs:
-    #     docdata.pprint()
+    for docdata in pyparser.pydocs:
+        docdata.pprint()
 
 
 # !---------------------------------------------------------------------------
