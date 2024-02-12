@@ -8,6 +8,7 @@ import ast
 import re
 
 from pythondoc import PyDoc
+from rubydoc import RubyDoc
 
 
 class Parser:
@@ -82,7 +83,7 @@ class PyParser(Parser):
             pydoc.add_class_info(node.name, docstr)
 
     def parse_file(self, fname, f_content):
-        """Read the given file for all docstrings, adding them to self.data"""
+        """Find the given pydoc by name and update its data."""
 
         pydoc = [doc for doc in self.pydocs if doc.filename == fname][0]
 
@@ -132,6 +133,7 @@ class RubyParser(Parser):
     def __init__(self, files):
         super().__init__(files)
 
+        self.rubydocs = []
         self.load_data()
 
     def load_data(self):
@@ -140,12 +142,49 @@ class RubyParser(Parser):
         """
 
         for fname, f_content in self.load_files():
-            print(fname)
-
             match = re.search(self.connector_pattern, f_content)
             if match is not None:
-                title_str, actions_str, triggers_str, methods_str = match.groups()
-                print(f"Title: {title_str}")
-                print(f"Actions: {actions_str}")
-                print(f"Triggers: {triggers_str}")
-                print(f"Methods: {methods_str}")
+                self.rubydocs.append(RubyDoc(fname))
+
+                match_groups = match.groups()
+                self.parse_file(fname, *match_groups)
+                # print(f"Title: {title_str}")
+                # print(f"Actions: {actions_str}")
+                # print(f"Triggers: {triggers_str}")
+                # print(f"Methods: {methods_str}")
+
+    def parse_actions(self, rubydoc, action_str):
+        """Parse the given string for a list of custom actions."""
+
+        print("\nACTIONS")
+        print(action_str)
+
+    def parse_triggers(self, rubydoc, trigger_str):
+        """Parse the given string for a list of custom triggers."""
+
+        print("\nTRIGGERS")
+        print(trigger_str)
+
+    def parse_methods(self, rubydoc, method_str):
+        """Parse the given string for a list of custom methods."""
+
+        print("\nMETHODS")
+        print(method_str)
+
+    def parse_file(self, fname, title, actions, triggers, methods):
+        """Find the given rubydoc by name and update its data."""
+
+        rubydoc = [doc for doc in self.rubydocs if doc.filename == fname][0]
+
+        # set connector name
+        connector_name = title.split(":", 1)[1].strip()
+        rubydoc.connector_name = connector_name
+
+        # set custom actions
+        self.parse_actions(rubydoc, actions)
+
+        # set custom triggers
+        self.parse_triggers(rubydoc, triggers)
+
+        # set custom methods
+        self.parse_methods(rubydoc, methods)
