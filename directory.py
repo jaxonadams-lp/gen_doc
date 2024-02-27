@@ -15,6 +15,8 @@ class Directory:
         self.files = []
         self.subdirectories = []
 
+        self.ignorables = [".venv", "venv", ".env", "env"]
+
         self.locate_files()
 
     def locate_files(self):
@@ -30,7 +32,8 @@ class Directory:
                         os.path.normpath(os.path.join(self.directory, entry))
                     )
             elif os.path.isdir(f"{self.directory}\\{entry}"):
-                subdirs.append(entry)
+                if entry not in self.ignorables:
+                    subdirs.append(entry)
 
         self.files = files
         for dir_name in subdirs:

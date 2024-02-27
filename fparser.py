@@ -148,10 +148,6 @@ class RubyParser(Parser):
 
                 match_groups = match.groups()
                 self.parse_file(fname, *match_groups)
-                # print(f"Title: {title_str}")
-                # print(f"Actions: {actions_str}")
-                # print(f"Triggers: {triggers_str}")
-                # print(f"Methods: {methods_str}")
 
     def parse_actions(self, rubydoc, action_str):
         """Parse the given string for a list of custom actions."""
@@ -179,6 +175,8 @@ class RubyParser(Parser):
         # set connector name
         connector_name = title.split(":", 1)[1].strip()
         rubydoc.connector_name = connector_name
+
+        print(f"Workato Connector: {rubydoc.connector_name}")
 
         # set custom actions
         self.parse_actions(rubydoc, actions)

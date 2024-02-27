@@ -11,6 +11,7 @@ from pathlib import Path
 
 from directory import Directory
 from fparser import PyParser, RubyParser
+from pdfwriter import PDFWriter
 
 
 def get_path():
@@ -67,7 +68,9 @@ def main():
     print("\n")
 
     pyparser = PyParser(directory.files_by_ext(".py"))
-    rbparser = RubyParser(directory.files_by_ext(".rb"))
+    # rbparser = RubyParser(directory.files_by_ext(".rb"))
+
+    writer = PDFWriter(pyparser.pydocs)
 
     # for docdata in pyparser.pydocs:
     #     docdata.pprint()
