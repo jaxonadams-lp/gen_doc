@@ -11,6 +11,7 @@ from pathlib import Path
 
 from directory import Directory
 from fparser import PyParser, RubyParser
+from docwriter import DocumentationWriter
 
 
 def get_path(message):
@@ -21,7 +22,7 @@ def get_path(message):
     path_in = input("  >> ")
     print("\n")
 
-    project_path = f"{Path.home()}/{path_in}"
+    project_path = f"{os.getcwd()}/{path_in}"
 
     print(f"Path: {path_in}")
     user_conf = input("Is this the correct path? [Y/n] >> ")
@@ -69,8 +70,23 @@ def main():
     pyparser = PyParser(directory.files_by_ext(".py"))
     # rbparser = RubyParser(directory.files_by_ext(".rb"))
 
-    out_path = get_path("Please enter the full path (including a filename) to"
+    out_path = get_path("Please enter the path to the directory to which"
                         " which you'd like the documentation exported.")
+    
+    try:
+        os.chdir(out_path)
+    except FileNotFoundError:
+        print(f"Error: unable to locate directory from path '{out_path}'")
+        sys.exit("\n")
+    
+    print("\n")
+    print("Please enter a filename for your new documentation.")
+    print("Be sure to include a file extension.")
+    fname = input("  >> ")
+    print("\n")
+
+    writer = DocumentationWriter(fname, pydocs=pyparser.pydocs)
+    writer.write_file()
 
     # for docdata in pyparser.pydocs:
     #     docdata.pprint()
@@ -78,4 +94,7 @@ def main():
 
 # !---------------------------------------------------------------------------
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit("\nGoodbye!\n")
