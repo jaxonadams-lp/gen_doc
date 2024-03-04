@@ -70,6 +70,7 @@ def main():
     pyparser = PyParser(directory.files_by_ext(".py"))
     # rbparser = RubyParser(directory.files_by_ext(".rb"))
 
+    # get desired output directory
     out_path = get_path("Please enter the path to the directory to which"
                         " which you'd like the documentation exported.")
     
@@ -79,17 +80,27 @@ def main():
         print(f"Error: unable to locate directory from path '{out_path}'")
         sys.exit("\n")
     
+    # get desired doc filename
     print("\n")
-    print("Please enter a filename for your new documentation.")
-    print("Be sure to include a file extension.")
+    print("Please enter a FILENAME for your new documentation.")
+    print("**Be sure to include a file extension.**")
     fname = input("  >> ")
     print("\n")
 
-    writer = DocumentationWriter(fname, pydocs=pyparser.pydocs)
-    writer.write_file()
+    # get project title and description
+    print("Please give me a NAME for your project.")
+    pname = input("  >> ")
+    print("\n")
+    pdesc = None
+    print("Would you like to add a DESCRIPTION? [y/N]")
+    desc_select = input("  >> ")
+    if desc_select in ["Y", "y", "yes"]:
+        print("Please enter a DESCRIPTION.")
+        pdesc = input("  >> ")
+    print("\n")
 
-    # for docdata in pyparser.pydocs:
-    #     docdata.pprint()
+    writer = DocumentationWriter(fname, pname, pdesc, pydocs=pyparser.pydocs)
+    writer.write_file()
 
 
 # !---------------------------------------------------------------------------

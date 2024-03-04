@@ -36,7 +36,7 @@ class PyDoc:
     def add_import(self, module, name, alias):
         """Add a new ImportInfo namedtuple to self.imported_libraries."""
 
-        new_import = self.ImportInfo(module, name, alias)
+        new_import = self.ImportInfo(module, name, alias or "")
         self.imported_libraries.append(new_import)
 
     def add_function_info(self, func_name, doc, args):
